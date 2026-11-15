@@ -1,0 +1,10 @@
+{{- if .Values.configMap.create -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "chart.configMapName" . }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+data:
+  database_url: {{ default (include "chart.mongo.serviceName" .) .Values.configMap.databaseUrl | quote }}
+{{- end }}

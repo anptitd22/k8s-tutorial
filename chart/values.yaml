@@ -1,0 +1,108 @@
+# Global overrides
+nameOverride: ""
+fullnameOverride: ""
+
+# Secret for MongoDB credentials
+secret:
+  create: true
+  name: "mongo-secret"
+  existingSecret: ""
+  data:
+    rootUsername: "username"
+    rootPassword: "password"
+  keys:
+    rootUsername: "mongo-root-username"
+    rootPassword: "mongo-root-password"
+
+# ConfigMap for MongoDB connection URL
+configMap:
+  create: true
+  name: "mongo-configmap"
+  databaseUrl: "" # Defaults to MongoDB service name if left empty
+
+# MongoDB Configuration
+mongo:
+  enabled: true
+  name: "mongo"
+  fullnameOverride: "mongo"
+  replicaCount: 1
+
+  image:
+    repository: mongo
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  imagePullSecrets: []
+
+  service:
+    name: "mongo-service"
+    type: ClusterIP
+    port: 27017
+    targetPort: 27017
+    annotations: {}
+
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Mongo Express Configuration
+mongoExpress:
+  enabled: true
+  name: "mongo-express"
+  fullnameOverride: "mongo-express"
+  replicaCount: 1
+
+  image:
+    repository: mongo-express
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  imagePullSecrets: []
+
+  service:
+    name: "mongo-express-service"
+    type: LoadBalancer
+    port: 8081
+    targetPort: 8081
+    nodePort: "" # Set e.g. 30000 if fixed port required
+    annotations: {}
+
+  ingress:
+    enabled: false
+    name: "mongo-express-ingress"
+    className: ""
+    annotations: {}
+    hosts:
+      - host: mongo-express.antd
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+      # - secretName: mongo-express-secret-tls
+      #   hosts:
+      #     - mongo-express.antd
+
+  tlsSecret:
+    enabled: false
+    name: "mongo-express-secret-tls"
+    # namespace: ingress-nginx
+    cert: ""
+    key: ""
+
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext: {}
+  securityContext: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}

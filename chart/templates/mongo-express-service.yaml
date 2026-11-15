@@ -1,0 +1,24 @@
+{{- if .Values.mongoExpress.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "chart.mongoExpress.serviceName" . }}
+  labels:
+    {{- include "chart.mongoExpress.labels" . | nindent 4 }}
+  {{- with .Values.mongoExpress.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.mongoExpress.service.type | default "LoadBalancer" }}
+  selector:
+    {{- include "chart.mongoExpress.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.mongoExpress.service.port | default 8081 }}
+      targetPort: {{ .Values.mongoExpress.service.targetPort | default 8081 }}
+      {{- if and (or (eq .Values.mongoExpress.service.type "NodePort") (eq .Values.mongoExpress.service.type "LoadBalancer")) .Values.mongoExpress.service.nodePort }}
+      nodePort: {{ .Values.mongoExpress.service.nodePort }}
+      {{- end }}
+{{- end }}

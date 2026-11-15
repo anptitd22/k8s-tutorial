@@ -1,0 +1,80 @@
+{{- if .Values.mongo.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chart.mongo.fullname" . }}
+  labels:
+    {{- include "chart.mongo.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.mongo.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "chart.mongo.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.mongo.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "chart.mongo.labels" . | nindent 8 }}
+        {{- with .Values.mongo.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.mongo.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mongo.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.mongo.name | default "mongo" }}
+          image: "{{ .Values.mongo.image.repository }}:{{ .Values.mongo.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.mongo.image.pullPolicy }}
+          {{- with .Values.mongo.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: mongodb
+              containerPort: {{ .Values.mongo.service.port | default 27017 }}
+              protocol: TCP
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "chart.secretName" . }}
+                  key: {{ .Values.secret.keys.rootUsername | default "mongo-root-username" }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "chart.secretName" . }}
+                  key: {{ .Values.secret.keys.rootPassword | default "mongo-root-password" }}
+          {{- with .Values.mongo.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.mongo.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.mongo.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mongo.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mongo.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mongo.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

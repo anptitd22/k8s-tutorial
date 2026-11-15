@@ -1,0 +1,31 @@
+1. MongoDB and Mongo Express have been deployed!
+
+{{- if .Values.mongoExpress.enabled }}
+
+Access Mongo Express Web UI:
+{{- if .Values.mongoExpress.ingress.enabled }}
+{{- range $host := .Values.mongoExpress.ingress.hosts }}
+  http{{ if $.Values.mongoExpress.ingress.tls }}s{{ end }}://{{ $host.host }}
+{{- end }}
+{{- else if contains "NodePort" .Values.mongoExpress.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "chart.mongoExpress.serviceName" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.mongoExpress.service.type }}
+  NOTE: It may take a moment for the LoadBalancer IP to become available.
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "chart.mongoExpress.serviceName" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.mongoExpress.service.port }}
+{{- else }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "{{ include "chart.mongoExpress.selectorLabels" . | replace "\n" "," }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8081:{{ .Values.mongoExpress.service.port }}
+  echo "Visit http://127.0.0.1:8081"
+{{- end }}
+{{- end }}
+
+2. Connect to MongoDB internally:
+  Host: {{ include "chart.mongo.serviceName" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  Port: {{ .Values.mongo.service.port }}
+
+3. Get Database Credentials:
+  Username: kubectl get secret --namespace {{ .Release.Namespace }} {{ include "chart.secretName" . }} -o jsonpath="{.data.{{ .Values.secret.keys.rootUsername | default "mongo-root-username" }}}" | base64 -d
+  Password: kubectl get secret --namespace {{ .Release.Namespace }} {{ include "chart.secretName" . }} -o jsonpath="{.data.{{ .Values.secret.keys.rootPassword | default "mongo-root-password" }}}" | base64 -d

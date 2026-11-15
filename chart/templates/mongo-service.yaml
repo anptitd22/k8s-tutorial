@@ -1,0 +1,21 @@
+{{- if .Values.mongo.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "chart.mongo.serviceName" . }}
+  labels:
+    {{- include "chart.mongo.labels" . | nindent 4 }}
+  {{- with .Values.mongo.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.mongo.service.type | default "ClusterIP" }}
+  selector:
+    {{- include "chart.mongo.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: mongodb
+      protocol: TCP
+      port: {{ .Values.mongo.service.port | default 27017 }}
+      targetPort: {{ .Values.mongo.service.targetPort | default 27017 }}
+{{- end }}

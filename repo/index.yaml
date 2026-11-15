@@ -1,0 +1,24 @@
+apiVersion: v1
+entries:
+  chart:
+  - apiVersion: v2
+    appVersion: 2.0.0
+    created: "2026-11-16T01:55:30.419939467+07:00"
+    description: A Helm chart for MongoDB and Mongo Express
+    digest: 43cfceaef9e90b774f09511e09cd5ae86d0da8c3a07d8f1f139a4f373358b7a9
+    name: chart
+    type: application
+    urls:
+    - chart-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2026-11-16T01:55:30.419519182+07:00"
+    description: A Helm chart for MongoDB and Mongo Express
+    digest: 8bd70760e5a2b853121cb1ba435b556324817ba92313aee3c6447f435cb76e3a
+    name: chart
+    type: application
+    urls:
+    - chart-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-11-16T01:55:30.418956465+07:00"
