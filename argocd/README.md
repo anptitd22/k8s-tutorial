@@ -14,7 +14,9 @@ argocd/
 │   ├── application-dev.yaml  # Môi trường Dev (1 replica, NodePort)
 │   └── application-prod.yaml # Môi trường Prod (2 replicas, Ingress, ClusterIP)
 ├── app-of-apps.yaml          # Quản trị theo mô hình Root Application (App of Apps)
+├── repo-secret.yaml          # Mẫu Secret chứa token cho GitHub Private Repo
 ├── install-argocd.sh         # Script tự động cài đặt Argo CD trên Kubernetes
+├── HELM_ARGOCD_GUIDE.md      # Giải thích chi tiết cơ chế Helm trong Argo CD
 └── README.md                 # Tài liệu hướng dẫn chi tiết
 ```
 

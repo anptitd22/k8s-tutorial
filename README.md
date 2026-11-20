@@ -44,7 +44,9 @@ k8s-tutorial/
 │   │   ├── application-dev.yaml         # Application môi trường Dev
 │   │   └── application-prod.yaml        # Application môi trường Prod
 │   ├── app-of-apps.yaml                 # Root Application (App of Apps pattern)
+│   ├── repo-secret.yaml                 # Secret cấu hình xác thực Private GitHub Repo
 │   ├── install-argocd.sh                # Script cài đặt tự động Argo CD
+│   ├── HELM_ARGOCD_GUIDE.md             # Hướng dẫn chi tiết các file Helm & Argo CD
 │   └── README.md                        # Hướng dẫn chi tiết triển khai Argo CD
 │
 └── README.md
