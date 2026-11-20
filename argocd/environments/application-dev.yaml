@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mongo-stack-dev
+  namespace: argocd
+  labels:
+    env: dev
+    app.kubernetes.io/name: mongo-stack-dev
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/anptitd22/k8s-tutorial.git
+    targetRevision: main
+    path: chart
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: mongoExpress.replicaCount
+          value: "1"
+        - name: mongoExpress.service.type
+          value: "NodePort"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mongo-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

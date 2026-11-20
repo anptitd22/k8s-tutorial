@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mongo-stack
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: mongo-stack
+    app.kubernetes.io/part-of: k8s-tutorial
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    # URL repository Git chứa Helm chart
+    repoURL: https://github.com/anptitd22/k8s-tutorial.git
+    targetRevision: main
+    path: chart
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mongo-app
+  syncPolicy:
+    automated:
+      prune: true     # Tự động xoá resource trong k8s nếu bị xoá trên Git
+      selfHeal: true  # Tự động sửa lại trạng thái nếu có thay đổi thủ công trên cluster
+    syncOptions:
+      - CreateNamespace=true  # Tự động tạo namespace mongo-app nếu chưa có
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

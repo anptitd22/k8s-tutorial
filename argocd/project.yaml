@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: k8s-tutorial-project
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: ArgoCD Project dành cho Kubernetes Tutorial (MongoDB & Mongo Express)
+  
+  # Chỉ cho phép deploy từ các Git repositories này
+  sourceRepos:
+    - https://github.com/anptitd22/k8s-tutorial.git
+
+  # Các cụm và namespace được phép deploy tới
+  destinations:
+    - namespace: "mongo-*"
+      server: https://kubernetes.default.svc
+    - namespace: "default"
+      server: https://kubernetes.default.svc
+
+  # Cho phép tạo và quản lý Namespace ở cấp Cluster
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+
+  # Cho phép quản lý tất cả các resource thông thường trong namespace đích
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mongo-stack-prod
+  namespace: argocd
+  labels:
+    env: prod
+    app.kubernetes.io/name: mongo-stack-prod
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/anptitd22/k8s-tutorial.git
+    targetRevision: main
+    path: chart
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: mongoExpress.replicaCount
+          value: "2"
+        - name: mongoExpress.service.type
+          value: "ClusterIP"
+        - name: mongoExpress.ingress.enabled
+          value: "true"
+        - name: mongoExpress.ingress.hosts[0].host
+          value: "mongo-express-prod.antd"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mongo-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

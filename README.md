@@ -1,8 +1,9 @@
 # Kubernetes Tutorial: Triển khai MongoDB & Mongo Express
 
-Dự án này hướng dẫn triển khai ứng dụng MongoDB và giao diện quản trị web Mongo Express trên Kubernetes theo 2 phương thức:
+Dự án này hướng dẫn triển khai ứng dụng MongoDB và giao diện quản trị web Mongo Express trên Kubernetes theo 3 phương thức:
 1. **Triển khai thủ công (Manual)** bằng các tệp manifest tĩnh (`manual/`).
 2. **Triển khai tự động hóa qua Helm Chart** với khả năng tham số hoá và cấu hình linh hoạt (`chart/`).
+3. **Triển khai tự động hoá GitOps qua Argo CD** quản lý trạng thái khai báo liên tục (`argocd/`).
 
 ---
 
@@ -35,6 +36,16 @@ k8s-tutorial/
 │       ├── NOTES.txt                    # Hướng dẫn hiển thị sau khi cài đặt helm
 │       └── tests/
 │           └── test-connection.yaml     # Helm test kiểm tra kết nối
+│
+├── argocd/                              # Triển khai GitOps với Argo CD
+│   ├── application.yaml                 # ArgoCD Application chính (triển khai chart)
+│   ├── project.yaml                     # ArgoCD AppProject phân quyền
+│   ├── environments/                    # Cấu hình đa môi trường
+│   │   ├── application-dev.yaml         # Application môi trường Dev
+│   │   └── application-prod.yaml        # Application môi trường Prod
+│   ├── app-of-apps.yaml                 # Root Application (App of Apps pattern)
+│   ├── install-argocd.sh                # Script cài đặt tự động Argo CD
+│   └── README.md                        # Hướng dẫn chi tiết triển khai Argo CD
 │
 └── README.md
 ```
@@ -301,3 +312,49 @@ REVISION	UPDATED                 	STATUS    	CHART      	APP VERSION	DESCRIPTION
 helm test demo-app -n helm-multi-version
 # Phase: Succeeded
 ```
+
+---
+
+### Cách 3: Triển khai liên tục GitOps với Argo CD (`argocd/`)
+
+Phương pháp GitOps sử dụng Git làm **Single Source of Truth** (Nguồn chân lý duy nhất). Argo CD liên tục giám sát trạng thái trong Git và đồng bộ tự động xuống Kubernetes cluster.
+
+#### 1. Cài đặt Argo CD vào Cluster
+```bash
+# Sử dụng script cài đặt nhanh:
+./argocd/install-argocd.sh
+
+# Hoặc bằng lệnh thủ công:
+kubectl create namespace argocd
+kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+#### 2. Lấy mật khẩu và đăng nhập Argo CD Web UI
+```bash
+# Lấy mật khẩu admin ban đầu:
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
+
+# Port-forward giao diện web:
+kubectl port-forward svc/argocd-server -n argocd 8443:443
+```
+Mở trình duyệt: `https://localhost:8443` (Username: `admin`).
+
+#### 3. Triển khai Helm Chart qua Argo CD Application
+```bash
+kubectl apply -f argocd/application.yaml
+```
+Argo CD sẽ tự động tạo namespace `mongo-app`, render chart `chart/` và đồng bộ toàn bộ resources lên cluster với chế độ `self-heal` và `prune`.
+
+#### 4. Triển khai nhiều môi trường (Dev / Prod)
+```bash
+# Triển khai môi trường Dev:
+kubectl apply -f argocd/environments/application-dev.yaml
+
+# Triển khai môi trường Prod:
+kubectl apply -f argocd/environments/application-prod.yaml
+
+# Hoặc dùng mô hình Root App-of-Apps:
+kubectl apply -f argocd/app-of-apps.yaml
+```
+Chi tiết cấu hình xem tại [argocd/README.md](file:///home/tranducan/coder/projects/package_github/k8s-tutorial/argocd/README.md).
+
