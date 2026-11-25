@@ -75,7 +75,7 @@ mongoExpress:
     annotations: {}
 
   ingress:
-    enabled: false
+    enabled: true
     name: "mongo-express-ingress"
     className: ""
     annotations: {}

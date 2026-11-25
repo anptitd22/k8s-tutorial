@@ -222,7 +222,7 @@ minikube service mongo-express-service
 | `mongoExpress.service.type` | Loại Service Mongo Express | `"LoadBalancer"` |
 | `mongoExpress.service.port` | Cổng Service Mongo Express | `8081` |
 | `mongoExpress.service.nodePort` | Cổng NodePort Mongo Express (để trống sẽ cấp phát tự động) | `""` |
-| `mongoExpress.ingress.enabled` | Kích hoạt Ingress cho Mongo Express | `false` |
+| `mongoExpress.ingress.enabled` | Kích hoạt Ingress cho Mongo Express | `true` |
 | `mongoExpress.ingress.hosts` | Danh sách hosts và paths cho Ingress | `mongo-express.antd` (`/`) |
 | `mongoExpress.tlsSecret.enabled` | Kích hoạt tạo Secret TLS riêng | `false` |
 
