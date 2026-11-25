@@ -77,7 +77,7 @@ mongoExpress:
   ingress:
     enabled: true
     name: "mongo-express-ingress"
-    className: ""
+    className: "nginx"
     annotations: {}
     hosts:
       - host: mongo-express.antd
