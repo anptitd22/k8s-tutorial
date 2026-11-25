@@ -60,6 +60,12 @@ spec:
     helm:
       valueFiles:
         - values.yaml                # Sử dụng file giá trị mặc định của chart
+      parameters:
+        # Kích hoạt Ingress để truy cập qua http://mongo-express.antd
+        - name: mongoExpress.ingress.enabled
+          value: "true"
+        - name: mongoExpress.ingress.hosts[0].host
+          value: "mongo-express.antd"
 
   # --- 2. ĐÍCH ĐẾN TRIỂN KHAI (DESTINATION) ---
   destination:
@@ -109,6 +115,11 @@ spec:
         # Tương đương: helm install --set mongoExpress.service.type=NodePort
         - name: mongoExpress.service.type
           value: "NodePort"
+        # Bật Ingress cho domain mongo-express.antd
+        - name: mongoExpress.ingress.enabled
+          value: "true"
+        - name: mongoExpress.ingress.hosts[0].host
+          value: "mongo-express.antd"
   destination:
     namespace: mongo-dev             # Triển khai vào namespace riêng cho dev
 ```

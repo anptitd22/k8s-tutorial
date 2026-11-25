@@ -18,6 +18,11 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+      parameters:
+        - name: mongoExpress.ingress.enabled
+          value: "true"
+        - name: mongoExpress.ingress.hosts[0].host
+          value: "mongo-express.antd"
   destination:
     server: https://kubernetes.default.svc
     namespace: mongo-app
