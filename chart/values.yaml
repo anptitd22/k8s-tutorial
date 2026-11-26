@@ -41,6 +41,20 @@ mongo:
     targetPort: 27017
     annotations: {}
 
+  # Persistence configuration using StatefulSet volumeClaimTemplates
+  persistence:
+    enabled: true
+    name: "data"
+    storageClass: "" # Leave empty to use the cluster's default StorageClass
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+    mountPath: /data/db
+    subPath: ""
+    annotations: {}
+
+  useEmptyDir: false # Fallback to emptyDir if persistence is disabled
+
   resources: {}
   podAnnotations: {}
   podLabels: {}

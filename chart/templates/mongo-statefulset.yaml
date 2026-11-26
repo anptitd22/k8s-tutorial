@@ -1,11 +1,12 @@
 {{- if .Values.mongo.enabled -}}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "chart.mongo.fullname" . }}
   labels:
     {{- include "chart.mongo.labels" . | nindent 4 }}
 spec:
+  serviceName: {{ include "chart.mongo.serviceName" . }}
   replicas: {{ .Values.mongo.replicaCount }}
   selector:
     matchLabels:
@@ -57,13 +58,26 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.mongo.volumeMounts }}
           volumeMounts:
+            {{- if .Values.mongo.persistence.enabled }}
+            - name: {{ .Values.mongo.persistence.name | default "data" }}
+              mountPath: {{ .Values.mongo.persistence.mountPath | default "/data/db" }}
+              {{- if .Values.mongo.persistence.subPath }}
+              subPath: {{ .Values.mongo.persistence.subPath }}
+              {{- end }}
+            {{- end }}
+            {{- with .Values.mongo.volumeMounts }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.mongo.volumes }}
+            {{- end }}
+      {{- if or .Values.mongo.volumes (and (not .Values.mongo.persistence.enabled) .Values.mongo.useEmptyDir) }}
       volumes:
+        {{- if and (not .Values.mongo.persistence.enabled) .Values.mongo.useEmptyDir }}
+        - name: {{ .Values.mongo.persistence.name | default "data" }}
+          emptyDir: {}
+        {{- end }}
+        {{- with .Values.mongo.volumes }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- with .Values.mongo.nodeSelector }}
       nodeSelector:
@@ -77,4 +91,24 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+  {{- if .Values.mongo.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.mongo.persistence.name | default "data" }}
+        labels:
+          {{- include "chart.mongo.labels" . | nindent 10 }}
+        {{- with .Values.mongo.persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+          {{- toYaml .Values.mongo.persistence.accessModes | nindent 10 }}
+        {{- if .Values.mongo.persistence.storageClass }}
+        storageClassName: {{ .Values.mongo.persistence.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.mongo.persistence.size | default "5Gi" }}
+  {{- end }}
 {{- end }}
